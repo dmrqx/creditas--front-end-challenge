@@ -1,4 +1,7 @@
+/* global alert, confirm */
+
 import './styles.css'
+import CreditasLoanCalculator from './calculator'
 
 export const checkFormValidity = formElement => formElement.checkValidity()
 
@@ -20,11 +23,11 @@ export const toStringFormValues = values => {
   return `Confirmação\n${values
     .map(value => `Campo: ${value.field}, Valor: ${value.value}`)
     .join('\n')}`.concat(
-      `\nTotal ${(IOF + INTEREST_RATE + TIME + 1) * VEHICLE_LOAN_AMOUNT}`
-    )
+    `\nTotal ${(IOF + INTEREST_RATE + TIME + 1) * VEHICLE_LOAN_AMOUNT}`
+  )
 }
 
-export function Send(values) {
+export function Send (values) {
   return new Promise((resolve, reject) => {
     try {
       resolve(toStringFormValues(values))
@@ -34,18 +37,18 @@ export function Send(values) {
   })
 }
 
-export function Submit(formElement) {
+export function Submit (formElement) {
   formElement.addEventListener('submit', function (event) {
     event.preventDefault()
     if (checkFormValidity(formElement)) {
       Send(getFormValues(formElement))
         .then(result => confirm(result, 'Your form submited success'))
-        .catch(error => Alert('Your form submited error', error))
+        .catch(error => alert('Your form submited error', error))
     }
   })
 }
 
-export function handleChangeRangeVehicleUnderWarranty(
+export function handleChangeRangeVehicleUnderWarranty (
   warrantyRangeElement,
   vehicleWarrantyElement
 ) {
@@ -56,7 +59,7 @@ export function handleChangeRangeVehicleUnderWarranty(
   })
 }
 
-export function handleChangeVehicleLoanAmount(
+export function handleChangeVehicleLoanAmount (
   loanAmountRangeElement,
   loanAmountElement
 ) {
@@ -68,11 +71,11 @@ export function handleChangeVehicleLoanAmount(
 }
 
 export default class CreditasChallenge {
-  static initialize() {
+  static initialize () {
     this.registerEvents()
   }
 
-  static registerEvents() {
+  static registerEvents () {
     Submit(document.querySelector('.form'))
 
     handleChangeRangeVehicleUnderWarranty(
@@ -89,4 +92,5 @@ export default class CreditasChallenge {
 
 document.addEventListener('DOMContentLoaded', function () {
   CreditasChallenge.initialize()
+  CreditasLoanCalculator.initialize()
 })
