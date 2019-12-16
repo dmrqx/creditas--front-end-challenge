@@ -1,4 +1,8 @@
+/* global alert, confirm */
+
 import './styles.css'
+import { calculateMonthlyInterest, calculateTotalPayment } from './calculations'
+import { renderFieldsToForm } from './elements/helpers'
 
 export const checkFormValidity = formElement => formElement.checkValidity()
 
@@ -12,19 +16,19 @@ export const getFormValues = formElement =>
 
 export const toStringFormValues = values => {
   const match = matchString => value => value.field === matchString
-  const IOF = 6.38 / 100
-  const INTEREST_RATE = 2.34 / 100
-  const TIME = values.find(match('parcelas')).value / 1000
-  const VEHICLE_LOAN_AMOUNT = values.find(match('valor-emprestimo')).value
+
+  const term = values.find(match('parcelas')).value
+  const loanAmount = values.find(match('valor-emprestimo')).value
+
+  const monthlyInterest = calculateMonthlyInterest({ term })
+  const totalPayment = calculateTotalPayment({ loanAmount, monthlyInterest })
 
   return `Confirmação\n${values
     .map(value => `Campo: ${value.field}, Valor: ${value.value}`)
-    .join('\n')}`.concat(
-      `\nTotal ${(IOF + INTEREST_RATE + TIME + 1) * VEHICLE_LOAN_AMOUNT}`
-    )
+    .join('\n')}`.concat(`\nTotal ${totalPayment}`)
 }
 
-export function Send(values) {
+export function Send (values) {
   return new Promise((resolve, reject) => {
     try {
       resolve(toStringFormValues(values))
@@ -34,59 +38,29 @@ export function Send(values) {
   })
 }
 
-export function Submit(formElement) {
+export function Submit (formElement) {
   formElement.addEventListener('submit', function (event) {
     event.preventDefault()
     if (checkFormValidity(formElement)) {
       Send(getFormValues(formElement))
         .then(result => confirm(result, 'Your form submited success'))
-        .catch(error => Alert('Your form submited error', error))
+        .catch(error => alert('Your form submited error', error))
     }
   })
 }
 
-export function handleChangeRangeVehicleUnderWarranty(
-  warrantyRangeElement,
-  vehicleWarrantyElement
-) {
-  const MIN_VALUE = 12000.0
-  warrantyRangeElement.addEventListener('change', function (event) {
-    vehicleWarrantyElement.value =
-      (Number(MIN_VALUE) * Number(event.target.value)) / 100 + Number(MIN_VALUE)
-  })
-}
-
-export function handleChangeVehicleLoanAmount(
-  loanAmountRangeElement,
-  loanAmountElement
-) {
-  const MIN_VALUE = 30000.0
-  loanAmountRangeElement.addEventListener('change', function (event) {
-    loanAmountElement.value =
-      (Number(MIN_VALUE) * Number(event.target.value)) / 100 + Number(MIN_VALUE)
-  })
-}
-
 export default class CreditasChallenge {
-  static initialize() {
+  static initialize () {
+    renderFieldsToForm({ containerSelector: '.form__fields' })
     this.registerEvents()
   }
 
-  static registerEvents() {
+  static registerEvents () {
     Submit(document.querySelector('.form'))
-
-    handleChangeRangeVehicleUnderWarranty(
-      document.getElementById('valor-garantia-range'),
-      document.getElementById('valor-garantia')
-    )
-
-    handleChangeVehicleLoanAmount(
-      document.getElementById('valor-emprestimo-range'),
-      document.getElementById('valor-emprestimo')
-    )
   }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
   CreditasChallenge.initialize()
+  // onDOMContentLoaded({ defaultOnLoadOption: 'veiculo' })
 })
