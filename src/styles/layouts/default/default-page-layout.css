@@ -1,0 +1,13 @@
+@import '_default-boxsize.css';
+@import '_default-containers.css';
+@import '_default-footer.css';
+@import '_default-header.css';
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--concrete);
+}
